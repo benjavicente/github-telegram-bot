@@ -2,6 +2,7 @@ import { Composer } from "grammy";
 import { Message } from "grammy/types";
 import { BotContext } from "./context";
 import { ChatInfo, encodeChatInfo } from "../jwt";
+import { MessageBuilder } from "../utils/msgBuilder";
 
 export const commandComposer = new Composer<BotContext>();
 
@@ -22,5 +23,17 @@ commandComposer.command("start", async (ctx) => {
 
   const chatInfo = getTargetChatType(ctx.message);
   const token = await encodeChatInfo(ctx.env.jwtSecret, chatInfo);
-  await ctx.reply(`\`${ctx.env.githubWebhookUrl}?token=${token}\``, { parse_mode: "MarkdownV2" });
+  ctx.env.githubWebhookUrl;
+  const msg = new MessageBuilder()
+    .add("Añade el siguiente webhook a tu repositorio u organización")
+    .add(`con <code>application/json</code>, secreto <code>${ctx.env.githubWebhookSecret}</code>`)
+    .add("y los eventos issues y/o discussion habilitados")
+    .add(`(<a href="https://docs.github.com/es/webhooks/using-webhooks/creating-webhooks">docs</a>).`)
+    .newLine(2)
+    .add(`<code>${ctx.env.githubWebhookUrl}?token=${token}</code>`)
+    .build();
+
+  console.info(msg);
+
+  await ctx.reply(msg, { parse_mode: "HTML", link_preview_options: { is_disabled: true } });
 });

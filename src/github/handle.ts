@@ -24,6 +24,7 @@ function getConfiguredTo(payload: PingEvent) {
 
 const unansweredDiscussionsQuery = "discussions?discussions_q=is%3Aopen+sort%3A-date_created+is%3Aunanswered";
 
+const urlsTitle = "URLs importantes:";
 function recommendedUrls(payload: PingEvent) {
   const urls: { name: string; url: string }[] = [];
   if (payload.hook.type === "Repository" && payload.hook.events.includes("discussion")) {
@@ -33,7 +34,13 @@ function recommendedUrls(payload: PingEvent) {
     });
   }
 
-  return urls.map(({ name, url }) => `- <a href="${url}">${name}</a>`).join("\n");
+  if (urls.length === 0) return;
+
+  return new MessageBuilder()
+    .add(urlsTitle)
+    .newLine()
+    .add(urls.map(({ name, url }) => `- <a href="${url}">${name}</a>`).join("\n"))
+    .build();
 }
 
 function isConfiguredProperly(payload: PingEvent) {
@@ -42,19 +49,24 @@ function isConfiguredProperly(payload: PingEvent) {
   return false;
 }
 
+const badlyConfiguredMessage = new MessageBuilder()
+  .add("El webhook no esta escuchando a issues o discussions.")
+  .add("Elimina el webhook y añade correctamente la configuración (ve /start).")
+  .build();
+
 githubWebhookEventHandler.on("ping", async ({ payload }, { bot, chatInfo }) => {
   if (!isConfiguredProperly(payload)) {
-    await bot.api.sendMessage(chatInfo.chatId, "The webhook is not listening to issues or discussions", {
+    await bot.api.sendMessage(chatInfo.chatId, badlyConfiguredMessage, {
       message_thread_id: chatInfo.topicId,
     });
     return;
   }
 
   const msg = new MessageBuilder()
-    .add("Webhook is working!")
+    .add("¡El Webhook está funcionando!")
     .newLine()
     .add(getConfiguredTo(payload))
-    .newLine()
+    .newLine(2)
     .add(recommendedUrls(payload))
     .newLine(2)
     .add(chatInfo.isSimpleGroup && simpleGroupWarning)
@@ -67,7 +79,7 @@ githubWebhookEventHandler.on("ping", async ({ payload }, { bot, chatInfo }) => {
 });
 
 function buildMessageFromDiscussion({ number, title, user, html_url, category }: DiscussionCreatedEvent["discussion"]) {
-  return `#${number} - ${category.name} - <a href="${user.html_url}">@${user.login}</a>\n<a href="${html_url}">${title}</a>`;
+  return `[${category.name}] <a href="${user.html_url}">@${user.login}</a>: <a href="${html_url}">${title}</a>`;
 }
 
 githubWebhookEventHandler.on("discussion.created", async ({ payload }, { bot, chatInfo }) => {
@@ -82,7 +94,7 @@ githubWebhookEventHandler.on("discussion.created", async ({ payload }, { bot, ch
 });
 
 function buildMessageFromIssue({ number, title, user, html_url }: IssuesOpenedEvent["issue"]) {
-  return `#${number} - <a href="${user.html_url}">@${user.login}</a>\n<a href="${html_url}">${title}</a>`;
+  return `<a href="${user.html_url}">@${user.login}</a>: <a href="${html_url}">${title}</a>`;
 }
 
 githubWebhookEventHandler.on("issues.opened", async ({ payload }, { bot, chatInfo }) => {

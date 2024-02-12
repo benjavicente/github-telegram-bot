@@ -4,5 +4,6 @@ export type BotContext = Context & {
   env: {
     githubWebhookUrl: string;
     jwtSecret: string;
+    githubWebhookSecret: string;
   };
 };

@@ -12,7 +12,11 @@ telegramApp.use("*", async (c, next) => {
   const bot = new Bot<BotContext>(c.env.TELEGRAM_BOT_TOKEN);
 
   bot.use((ctx, next) => {
-    ctx.env = { githubWebhookUrl: `${c.env.BASE_URL}/github/webhook`, jwtSecret: c.env.JWT_SECRET };
+    ctx.env = {
+      githubWebhookUrl: `${c.env.BASE_URL}/github/webhook`,
+      jwtSecret: c.env.JWT_SECRET,
+      githubWebhookSecret: c.env.GITHUB_WEBHOOK_SECRET,
+    };
     return next();
   });
 
