@@ -33,7 +33,9 @@ commandComposer.command("start", async (ctx) => {
     .add(`<code>${ctx.env.githubWebhookUrl}?token=${token}</code>`)
     .build();
 
-  console.info(msg);
-
-  await ctx.reply(msg, { parse_mode: "HTML", link_preview_options: { is_disabled: true } });
+  await ctx.api.sendMessage(chatInfo.chatId, msg, {
+    message_thread_id: chatInfo.topicId,
+    parse_mode: "HTML",
+    link_preview_options: { is_disabled: true },
+  });
 });
