@@ -82,7 +82,7 @@ function buildMessageFromDiscussion({
   discussion: { title, user, html_url, category },
   repository,
 }: DiscussionCreatedEvent) {
-  return `<a href="${repository.html_url}">${repository.name}</a>[${category.emoji} ${category.name}]</a> - <a href="${user.html_url}">@${user.login}</a>\n<a href="${html_url}">${title}</a>`;
+  return `<a href="${repository.html_url}">${repository.name}</a>[${category.emoji} ${category.name}] - <a href="${user.html_url}">@${user.login}</a>\n<a href="${html_url}">${title}</a>`;
 }
 
 githubWebhookEventHandler.on("discussion.created", async ({ payload }, { bot, chatInfo }) => {
