@@ -4,7 +4,7 @@ import { Bot } from "grammy";
 import { ChatInfo } from "../jwt";
 import { BotContext } from "../telegram/context";
 import { createEventHandler } from "./event-handler";
-import { DiscussionCreatedEvent, IssuesOpenedEvent, PingEvent } from "@octokit/webhooks-types";
+import { DiscussionCreatedEvent, IssuesOpenedEvent, PingEvent, PullRequestEvent } from "@octokit/webhooks-types";
 import { MessageBuilder } from "../utils/msgBuilder";
 
 type Env = {
@@ -78,12 +78,15 @@ githubWebhookEventHandler.on("ping", async ({ payload }, { bot, chatInfo }) => {
   });
 });
 
-function buildMessageFromDiscussion({ number, title, user, html_url, category }: DiscussionCreatedEvent["discussion"]) {
-  return `[${category.name}] <a href="${user.html_url}">@${user.login}</a>: <a href="${html_url}">${title}</a>`;
+function buildMessageFromDiscussion({
+  discussion: { title, user, html_url, category },
+  repository,
+}: DiscussionCreatedEvent) {
+  return `<a href="${repository.html_url}">${repository.name}</a>[${category.emoji} ${category.name}]</a> - <a href="${user.html_url}">@${user.login}</a>\n<a href="${html_url}">${title}</a>`;
 }
 
 githubWebhookEventHandler.on("discussion.created", async ({ payload }, { bot, chatInfo }) => {
-  await bot.api.sendMessage(chatInfo.chatId, buildMessageFromDiscussion(payload.discussion), {
+  await bot.api.sendMessage(chatInfo.chatId, buildMessageFromDiscussion(payload), {
     parse_mode: "HTML",
     message_thread_id: chatInfo.topicId,
     link_preview_options: {
@@ -93,17 +96,32 @@ githubWebhookEventHandler.on("discussion.created", async ({ payload }, { bot, ch
   });
 });
 
-function buildMessageFromIssue({ number, title, user, html_url }: IssuesOpenedEvent["issue"]) {
-  return `<a href="${user.html_url}">@${user.login}</a>: <a href="${html_url}">${title}</a>`;
+function buildMessageFromIssue({ issue: { title, user, html_url, number }, repository }: IssuesOpenedEvent) {
+  return `<a href="${repository.html_url}">${repository.name}</a>#${number} - <a href="${user.html_url}">@${user.login}</a>\n<a href="${html_url}">${title}</a>`;
 }
 
 githubWebhookEventHandler.on("issues.opened", async ({ payload }, { bot, chatInfo }) => {
-  await bot.api.sendMessage(chatInfo.chatId, buildMessageFromIssue(payload.issue), {
+  await bot.api.sendMessage(chatInfo.chatId, buildMessageFromIssue(payload), {
     parse_mode: "HTML",
     message_thread_id: chatInfo.topicId,
     link_preview_options: {
       prefer_small_media: true,
       url: payload.issue.html_url,
+    },
+  });
+});
+
+function buildMessageFromPR({ pull_request: { title, user, html_url, number }, repository }: PullRequestEvent) {
+  return `<a href="${repository.html_url}">${repository.name}</a>#${number} - <a href="${user.html_url}">@${user.login}</a>\n<a href="${html_url}">${title}</a>`;
+}
+
+githubWebhookEventHandler.on("pull_request.opened", async ({ payload }, { bot, chatInfo }) => {
+  await bot.api.sendMessage(chatInfo.chatId, buildMessageFromPR(payload), {
+    parse_mode: "HTML",
+    message_thread_id: chatInfo.topicId,
+    link_preview_options: {
+      prefer_small_media: true,
+      url: payload.pull_request.html_url,
     },
   });
 });

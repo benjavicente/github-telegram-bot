@@ -27,7 +27,7 @@ commandComposer.command("start", async (ctx) => {
   const msg = new MessageBuilder()
     .add("Añade el siguiente webhook a tu repositorio u organización")
     .add(`con <code>application/json</code>, secreto <code>${ctx.env.githubWebhookSecret}</code>`)
-    .add("y los eventos issues y/o discussion habilitados")
+    .add("y los eventos issues, discussion, o/y PRs habilitados")
     .add(`(<a href="https://docs.github.com/es/webhooks/using-webhooks/creating-webhooks">docs</a>).`)
     .newLine(2)
     .add(`<code>${ctx.env.githubWebhookUrl}?token=${token}</code>`)
