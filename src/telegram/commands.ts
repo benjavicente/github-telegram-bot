@@ -23,7 +23,7 @@ commandComposer.command("start", async (ctx) => {
 
   const chatInfo = getTargetChatType(ctx.message);
   const token = await encodeChatInfo(ctx.env.jwtSecret, chatInfo);
-  ctx.env.githubWebhookUrl;
+
   const msg = new MessageBuilder()
     .add("Añade el siguiente webhook a tu repositorio u organización")
     .add(`con <code>application/json</code>, secreto <code>${ctx.env.githubWebhookSecret}</code>`)

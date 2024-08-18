@@ -9,6 +9,7 @@ import { Env } from "../env";
 export const telegramApp = new Hono<Env>();
 
 telegramApp.use("*", async (c, next) => {
+  // Inject the bot into the context
   const bot = new Bot<BotContext>(c.env.TELEGRAM_BOT_TOKEN);
 
   bot.use((ctx, next) => {
@@ -38,7 +39,6 @@ telegramApp.get("telegram/webhook", async (c) => {
 telegramApp.post("telegram/webhook", async (c) => {
   const providedSecret = c.req.header("X-Telegram-Bot-Api-Secret-Token");
 
-  console.log({ providedSecret, TELEGRAM_BOT_SECRET: c.env.TELEGRAM_BOT_SECRET });
   if (providedSecret !== c.env.TELEGRAM_BOT_SECRET) {
     c.status(401);
     return c.text("Unauthorized");

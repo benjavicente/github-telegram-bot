@@ -1,10 +1,14 @@
-# Telegram Discussions Bot
+# Telegram Notification Bot
 
-```
-npm install
-npm run dev
+Bot stateless que notifica sobre la creación de Issues, Discussions y PRs.
+
+```sh
+pnpm install
+pnpm run dev
 ```
 
-```
-npm run deploy
+Ver [env.ts](./src/env.ts) para las variables de entorno necesarias.
+
+```sh
+pnpm run deploy
 ```

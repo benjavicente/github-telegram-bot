@@ -46,6 +46,7 @@ function recommendedUrls(payload: PingEvent) {
 function isConfiguredProperly(payload: PingEvent) {
   if (payload.hook.events.includes("issues")) return true;
   if (payload.hook.events.includes("discussion")) return true;
+  if (payload.hook.events.includes("pull_request")) return true;
   return false;
 }
 
