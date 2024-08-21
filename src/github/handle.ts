@@ -22,6 +22,10 @@ function getConfiguredTo(payload: PingEvent) {
   return `Escuchando como App`;
 }
 
+function scapeMessage(mgs: string) {
+  return mgs.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+}
+
 const unansweredDiscussionsQuery = "discussions?discussions_q=is%3Aopen+sort%3A-date_created+is%3Aunanswered";
 
 const urlsTitle = "URLs importantes:";
@@ -83,7 +87,9 @@ function buildMessageFromDiscussion({
   discussion: { title, user, html_url, category },
   repository,
 }: DiscussionCreatedEvent) {
-  return `<a href="${repository.html_url}">${repository.name}</a>[${category.name}] - <a href="${user.html_url}">@${user.login}</a>\n<a href="${html_url}">${title}</a>`;
+  return `<a href="${repository.html_url}">${repository.name}</a>[${category.name}] - <a href="${user.html_url}">@${
+    user.login
+  }</a>\n<a href="${html_url}">${scapeMessage(title)}</a>`;
 }
 
 githubWebhookEventHandler.on("discussion.created", async ({ payload }, { bot, chatInfo }) => {
@@ -98,7 +104,9 @@ githubWebhookEventHandler.on("discussion.created", async ({ payload }, { bot, ch
 });
 
 function buildMessageFromIssue({ issue: { title, user, html_url, number }, repository }: IssuesOpenedEvent) {
-  return `<a href="${repository.html_url}">${repository.name}</a>#${number} - <a href="${user.html_url}">@${user.login}</a>\n<a href="${html_url}">${title}</a>`;
+  return `<a href="${repository.html_url}">${repository.name}</a>#${number} - <a href="${user.html_url}">@${
+    user.login
+  }</a>\n<a href="${html_url}">${scapeMessage(title)}</a>`;
 }
 
 githubWebhookEventHandler.on("issues.opened", async ({ payload }, { bot, chatInfo }) => {
@@ -113,7 +121,9 @@ githubWebhookEventHandler.on("issues.opened", async ({ payload }, { bot, chatInf
 });
 
 function buildMessageFromPR({ pull_request: { title, user, html_url, number }, repository }: PullRequestEvent) {
-  return `<a href="${repository.html_url}">${repository.name}</a>#${number} - <a href="${user.html_url}">@${user.login}</a>\n<a href="${html_url}">${title}</a>`;
+  return `<a href="${repository.html_url}">${repository.name}</a>#${number} - <a href="${user.html_url}">@${
+    user.login
+  }</a>\n<a href="${html_url}">${scapeMessage(title)}</a>`;
 }
 
 githubWebhookEventHandler.on("pull_request.opened", async ({ payload }, { bot, chatInfo }) => {
